@@ -123,3 +123,5 @@ STATIC_URL = '/static/'
 # make the following changes to facilitate file upload(images)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static-server', 'media-root')
 MEDIA_URL = '/media/'
+
+from rest_conf.main import *

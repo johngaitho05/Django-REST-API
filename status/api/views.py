@@ -1,8 +1,8 @@
 import json
-
+from rest_framework.authentication import SessionAuthentication
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from .utils import is_json
@@ -19,11 +19,8 @@ the operations that can be performed at the ListView endpoint
 """
 
 
-@method_decorator(login_required,
-                  name='dispatch')
 class StatusAPIView(generics.ListCreateAPIView):
-    permission_classes = []
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
 
@@ -38,10 +35,7 @@ class StatusAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if serializer is not None:
-            try:
-                return serializer.save(user=self.request.user)
-            except ModuleNotFoundError:
-                return json.dumps({'detail': 'Authentication failed!!'})
+            return serializer.save(user=self.request.user)
         return
 
 
@@ -51,11 +45,8 @@ the operations that can be performed at the DetailView endpoint
 """
 
 
-@method_decorator(login_required,
-                  name='dispatch')
 class StatusDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = []
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     lookup_url_kwarg = 'id'
@@ -72,8 +63,6 @@ efficient when we don't have file uploads
 """
 
 
-@method_decorator(login_required,
-                  name='dispatch')
 class StatusGeneralAPIView(
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
@@ -81,8 +70,7 @@ class StatusGeneralAPIView(
     mixins.RetrieveModelMixin,
     generics.ListAPIView,
 ):
-    permission_classes = []
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = StatusSerializer
     passed_id = None
 
