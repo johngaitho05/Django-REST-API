@@ -64,6 +64,7 @@ from updates.forms import UpdateModelForm
 #         return self.render_to_response(message)
 
 
+# Performing all CRUD operations from one endpoint
 class UpdateModelAPIListView(HttpResponseMixin, CSRFExemptMixin, View):
     # All CRUD operations being performed at one ENDPOINT ('api/updates/')
 
@@ -100,7 +101,7 @@ class UpdateModelAPIListView(HttpResponseMixin, CSRFExemptMixin, View):
             error_message = json.dumps({"message": "Invalid data sent. Please send valid JSON data"})
             return self.render_to_response(error_message, status=400)
         data = json.loads(request.body)
-        form  = UpdateModelForm(data)
+        form = UpdateModelForm(data)
         if form.is_valid():
             obj = form.save(commit=True)
             obj_data = obj.serialize()
@@ -119,7 +120,7 @@ class UpdateModelAPIListView(HttpResponseMixin, CSRFExemptMixin, View):
         new_obj = json.loads(request.body)
         passed_id = new_obj.get('id', None)
         if not passed_id:
-            error_message = json.dumps({"id":"This field is required to update an item"})
+            error_message = json.dumps({"id": "This field is required to update an item"})
             return self.render_to_response(error_message, status=400)
         obj = self.get_object(id=passed_id)
         if obj is None:
@@ -160,13 +161,3 @@ class UpdateModelAPIListView(HttpResponseMixin, CSRFExemptMixin, View):
         to_delete.delete()
         message = json.dumps({"message": "Success. One item deleted."})
         return self.render_to_response(message)
-
-
-
-
-
-
-
-
-
-

@@ -1,14 +1,17 @@
-mydict = {
-    "user":1,
-    "content": "hello"
-}
+import json
+import requests
 
-new_dict = {"user":2, "content":"new content","chaos":3}
+endpoint = "http://127.0.0.1:8000/status/api/"
 
 
-for key in new_obj.keys():
-    if key in old_obj:
-        old_obj[key] = new_obj[key]
+def do_something(method, data=None):
+    headers = {'content-type': 'application/json'}
+    json_data = json.dumps(data or {})
+    response = requests.request(method, endpoint, data=json_data, headers=headers)
+    print(response.status_code)
+    return response
 
 
-print(mydict)
+pydata = {'id': 14}
+mtd = 'delete'
+do_something(mtd, pydata)
