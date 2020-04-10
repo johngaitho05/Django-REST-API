@@ -1,4 +1,7 @@
 import json
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from rest_framework import generics, mixins
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
@@ -8,11 +11,16 @@ from rest_framework.response import Response
 from .serializers import StatusSerializer
 
 """
-you can also use mixins such as CreateModelMixin  to customize
+Using separate endpoints for ListView and DetailView
+efficient when you want your API to support file uploads
+
+You can also use mixins such as CreateModelMixin  to customize
 the operations that can be performed at the ListView endpoint
 """
 
 
+@method_decorator(login_required,
+                  name='dispatch')
 class StatusAPIView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
@@ -28,6 +36,14 @@ class StatusAPIView(generics.ListCreateAPIView):
             qs = qs.filter(content__contains=query)
         return qs
 
+    def perform_create(self, serializer):
+        if serializer is not None:
+            try:
+                return serializer.save(user=self.request.user)
+            except ModuleNotFoundError:
+                return json.dumps({'detail': 'Authentication failed!!'})
+        return
+
 
 """
 you can also use mixins such as UpdateModelMixin and DestroyModelMixin to customize
@@ -35,6 +51,8 @@ the operations that can be performed at the DetailView endpoint
 """
 
 
+@method_decorator(login_required,
+                  name='dispatch')
 class StatusDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
@@ -42,10 +60,20 @@ class StatusDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StatusSerializer
     lookup_url_kwarg = 'id'
 
+    def perform_update(self, serializer):
+        if serializer is not None:
+            return serializer.save(user=self.request.user)
+        return
 
-"""One endpoint for all CRUD operations"""
+
+"""
+One endpoint for all CRUD operations
+efficient when we don't have file uploads
+"""
 
 
+@method_decorator(login_required,
+                  name='dispatch')
 class StatusGeneralAPIView(
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
